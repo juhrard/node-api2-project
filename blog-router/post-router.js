@@ -127,18 +127,29 @@ router.put('/:id', (req, res) => {
 // Get a specific post's comments:
 
 router.get('/:id/comments', (req, res) => {
-  Blog.findPostComments(req.params.id)
-  .then(([post]) => {
-    if (post) {
-      res.status(200).json(post);
-    } else {
-      res.status(404).json({ message: "The post with the specified ID does not exist, or has no comments." });
-    }
-  })
-  .catch(error => {
-    console.log(error);
-    res.status(500).json({ error: "The post information could not be retrieved." });
-  });
+  Blog.findById(req.params.id)
+    .then(([comment]) => {
+      if(comment) {
+        Blog.findPostComments(req.params.id)
+          .then(([post]) => {
+            if (post) {
+              res.status(200).json(post);
+            } else {
+              res.status(404).json({ message: "The post with the specified ID does not exist, or has no comments." });
+            }
+          })
+          .catch(error => {
+            console.log(error);
+            res.status(500).json({ error: "The post information could not be retrieved." });
+          });
+      } else {
+        res.status(404).json({ message: "The comment with the specified ID does not exist" });
+      }
+    })
+    .catch(error => {
+      console.log(error);
+      res.status(500).json({ error: "The post information could not be retrieved." });
+    });
 });
 
 // Add an endpoint for adding new comment to a post
