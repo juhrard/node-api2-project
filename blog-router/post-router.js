@@ -24,9 +24,9 @@ router.get('/', (req, res) => {
 // Get specific post:
 
 router.get('/:id', (req, res) => {
-  console.log(req.params.id)
   Blog.findById(req.params.id)
   .then(([post]) => {
+    console.log(post)
     if (post) {
       res.status(200).json(post);
     } else {
@@ -59,18 +59,25 @@ router.post('/', (req, res) => {
 // Delete a post:
 
 router.delete('/:id', (req, res) => {
-  Blog.remove(req.params.id)
-  .then(post => {
-    if (post > 0) {
-      res.status(200).json({ message: 'The post has been nuked' });
-    } else {
-      res.status(404).json({ message: "The post with the specified ID does not exist." });
-    }
-  })
+  Blog.findById(req.params.id)
+    .then(post => {
+      Blog.remove(req.params.id)
+        .then(response => {
+          if (response > 0) {
+            res.status(200).json(post);
+          } else {
+            res.status(404).json({ message: "The post with the specified ID does not exist." });
+          }
+        })
   .catch(error => {
     console.log(error);
     res.status(500).json({ error: "The post could not be removed" });
   });
+    })
+    .catch(error => {
+      console.log(error);
+      res.status(500).json({ error: "The post could not be found" });
+    });
 });
 
 // Edit a post:
