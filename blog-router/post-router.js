@@ -44,8 +44,19 @@ router.get('/:id', (req, res) => {
 router.post('/', (req, res) => {
   if (req.body.title && req.body.contents){
     Blog.insert(req.body)
-      .then(post => {
-        res.status(201).json(req.body);
+      .then(newPost => {
+        Blog.findById(newPost.id)
+          .then(([post]) => {
+            if (post) {
+              res.status(201).json(post);
+            } else {
+              res.status(404).json({ message: "The post with the specified ID does not exist." });
+            }
+          })
+          .catch(error => {
+            console.log(error);
+            res.status(500).json({ error: "The post information could not be retrieved." });
+          });
       })
       .catch(error => {
         console.log(error);
@@ -121,7 +132,7 @@ router.get('/:id/comments', (req, res) => {
     if (post) {
       res.status(200).json(post);
     } else {
-      res.status(404).json({ message: "The post with the specified ID does not exist." });
+      res.status(404).json({ message: "The post with the specified ID does not exist, or has no comments." });
     }
   })
   .catch(error => {
@@ -142,7 +153,18 @@ router.post("/:id/comments", (req, res) => {
         if(post) {
           Blog.insertComment(comment)
             .then(inserted => {
-              res.status(201).json(comment);
+              Blog.findCommentById(inserted.id)
+                .then(comment => {
+                  if (comment) {
+                    res.status(201).json(comment);
+                  } else {
+                    res.status(404).json({ message: "The post with the specified ID does not exist." });
+                  }
+                })
+                .catch(error => {
+                  console.log(error);
+                  res.status(500).json({ error: "There was an error while saving the comment to the database" });
+                })
             })
             .catch(error => {
               console.log(error);
