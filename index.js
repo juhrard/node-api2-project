@@ -1,3 +1,5 @@
+require('dotenv').config()
+
 const express = require("express");
 
 const post_router = require("./blog-router/post-router");
@@ -13,6 +15,7 @@ server.get("/", (req, res) => {
   res.send(`
     <h2>Blog API</h2>
     <p>Welcome to the Blog API</p>
+    <p>${process.env.SECRET}</p>
   `);
 });
 
